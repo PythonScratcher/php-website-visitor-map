@@ -1,7 +1,5 @@
 <?php
-// tracker.php
-// logs visits by country into data.json using IP2Location DB1.LITE.IPV6.CSV
-// supports IPv4 + IPv6 because that CSV contains both
+
 
 // --- CONFIG ---
 $CSV_IPV6 = __DIR__ . '/IP2LOCATION-LITE-DB1.IPV6.CSV'; // drop the CSV here
@@ -17,7 +15,7 @@ header('Content-Type: application/json');
 
 // ---------------- IP Helpers ----------------
 function is_public_ip(string $ip) : bool {
-    // Reject private, reserved, loopback, link-local, etc.
+    // Reject private, reserved, loopback, link-local, etc etc
     if (!filter_var($ip, FILTER_VALIDATE_IP)) return false;
     if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) return true;
     return false;
@@ -26,7 +24,7 @@ function is_public_ip(string $ip) : bool {
 function client_ip(bool $trust_proxy, array $trusted) : string {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
-    // Check trusted proxy headers
+    // check trusted proxy headers
     if ($trust_proxy && in_array($ip, $trusted, true)) {
         $headers = [
             $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '',
@@ -128,7 +126,7 @@ function country_from_ip(string $ip, string $csvFile) : string {
         }
     }
     fclose($fh);
-    return 'ZZ';
+    return 'ZZ'; // ??? what (i forgot why i did this)
 }
 
 function load_data(string $file) : array {

@@ -19,7 +19,7 @@ $centroids = [];
 foreach ($lines as $i => $line) {
     if ($i === 0 || trim($line) === '') continue; // skip header
     $cols = str_getcsv($line);
-    // CSV format: longitude,latitude,COUNTRY,ISO,COUNTRYAFF,AFF_ISO
+    // CSV format: longitude,latitude,COUNTRY,ISO,COUNTRYAFF,AFF_ISO *********************************************
     $lon = (float)$cols[0];
     $lat = (float)$cols[1];
     $country = $cols[2];
@@ -29,7 +29,7 @@ foreach ($lines as $i => $line) {
     }
 }
 
-// Merge visitor counts with centroids
+// merge teh visitor counts with centroids
 $countries = [];
 foreach ($visitorCounts as $iso2 => $count) {
     if (isset($centroids[$iso2])) {
@@ -49,14 +49,14 @@ foreach ($visitorCounts as $iso2 => $count) {
     }
 }
 
-// Sort by visitor count descending
+// sort by visitor count descending
 uasort($countries, fn($a, $b) => $b['count'] <=> $a['count']);
 
 // Stats
 $totalCountries = count($centroids);
 $visitedCountries = count(array_filter($countries, fn($c) => $c['count'] > 0));
 
-// Find missing ones
+// find missing ones
 $missingCountries = [];
 foreach ($centroids as $iso => $info) {
     if (!isset($visitorCounts[$iso])) {
@@ -137,7 +137,7 @@ for (const [iso, info] of Object.entries(countries)) {
     const marker = L.marker([info.lat, info.lon], {
         icon: L.icon({
             iconUrl: `https://flagcdn.com/w80/${iso.toLowerCase()}.png`,
-            iconSize: [40,20], // flags [40,20]
+            iconSize: [40,20], // flags ize
             iconAnchor: [20,10]
         })
     }).addTo(map)
@@ -145,7 +145,7 @@ for (const [iso, info] of Object.entries(countries)) {
     markers[iso] = marker;
 }
 
-// Sidebar search
+//  search
 const searchInput = document.getElementById('search');
 const countryList = document.getElementById('countryList');
 searchInput.addEventListener('input', ()=>{
@@ -156,7 +156,7 @@ searchInput.addEventListener('input', ()=>{
     }
 });
 
-// Clicking a country zooms to marker
+// clicking  country zooms to marker
 countryList.addEventListener('click', e=>{
     const li = e.target.closest('li');
     if (!li) return;
@@ -167,7 +167,7 @@ countryList.addEventListener('click', e=>{
     }
 });
 
-// Toggle missing list
+// toggle missing list !!!FIXED!!!
 const missing = document.getElementById('missingList');
 const toggleBtn = document.getElementById('toggleMissing');
 toggleBtn.addEventListener('click', ()=>{

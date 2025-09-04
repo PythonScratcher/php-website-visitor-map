@@ -1,11 +1,11 @@
 <?php
-// stats.php — compact SVG card with embedded flags (base64)
+
 
 // Load visitor data
 $data = file_exists("data.json") ? json_decode(file_get_contents("data.json"), true) : [];
 $visitorCounts = $data["countries"] ?? [];
 
-// Load ISO -> Country mapping
+// Load iso -> country mapping
 $csv = file("countries.csv", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 $isoMap = [];
 foreach ($csv as $i => $line) {
@@ -14,7 +14,7 @@ foreach ($csv as $i => $line) {
     $isoMap[$cols[3]] = $cols[2];
 }
 
-// Sort and slice
+// sort an dslice
 arsort($visitorCounts);
 $top10 = array_slice($visitorCounts, 0, 10, true);
 $total = array_sum($visitorCounts);
@@ -47,7 +47,7 @@ foreach ($top10 as $iso => $count):
     $x = $padding + $col * $itemWidth;
     $y = 70 + $row * $itemHeight;
 
-    // Fetch flag and convert to base64
+    // fetch flag and convert to base64
     $flagUrl = "https://flagcdn.com/w40/".strtolower($iso).".png";
     $flagData = @file_get_contents($flagUrl);
     if ($flagData) {
