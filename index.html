@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Visitor Stats Preview</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f9f9f9;
+    }
+    .stats-card {
+      text-align: center;
+    }
+    .stats-card img {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .stats-card a {
+      text-decoration: none;
+      color: #007BFF;
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .stats-card a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="stats-card">
+    <a href="map.php" title="Go to visitor map">
+      <img src="stats.php" alt="Visitor Stats">
+    </a>
+    <a href="map.php">View Full Map</a>
+  </div>
+</body>
+</html>

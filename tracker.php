@@ -9,20 +9,48 @@ $DATA_JSON = __DIR__ . '/data.json';
 // trust proxies? (if behind CF/nginx etc.)
 $TRUST_PROXY = false;
 $TRUSTED_PROXIES = [];
+// key to allow test IP override
+$TEST_KEY = 'YOUR_SECRET_KEY';
 // ---------------
 
 header('Content-Type: application/json');
 
+// ---------------- IP Helpers ----------------
+function is_public_ip(string $ip) : bool {
+    // Reject private, reserved, loopback, link-local, etc.
+    if (!filter_var($ip, FILTER_VALIDATE_IP)) return false;
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) return true;
+    return false;
+}
+
 function client_ip(bool $trust_proxy, array $trusted) : string {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+    // Check trusted proxy headers
     if ($trust_proxy && in_array($ip, $trusted, true)) {
-        $xff = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
-        if ($xff) {
-            $parts = array_map('trim', explode(',', $xff));
-            if (!empty($parts[0])) return $parts[0];
+        $headers = [
+            $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '',
+            $_SERVER['HTTP_CLIENT_IP'] ?? '',
+            $_SERVER['HTTP_X_REAL_IP'] ?? '',
+        ];
+        foreach ($headers as $h) {
+            if ($h) {
+                $parts = array_map('trim', explode(',', $h));
+                foreach ($parts as $candidate) {
+                    if (filter_var($candidate, FILTER_VALIDATE_IP) && is_public_ip($candidate)) {
+                        return $candidate;
+                    }
+                }
+            }
         }
     }
-    return $ip;
+
+    // fallback to REMOTE_ADDR if public
+    if (filter_var($ip, FILTER_VALIDATE_IP) && is_public_ip($ip)) {
+        return $ip;
+    }
+
+    return '0.0.0.0';
 }
 
 function ipToBin16(string $ip) : ?string {
@@ -61,7 +89,7 @@ function ipv4DecToBin16(string $dec) : string {
 }
 
 function parseCsvRowToRange(array $row) : ?array {
-    if (count($row) < 4) return null;
+    if (count($row) < 3) return null;
     [$from, $to, $cc] = [$row[0], $row[1], strtoupper(trim($row[2]))];
 
     $decimal = ctype_digit($from) && ctype_digit($to);
@@ -83,6 +111,7 @@ function parseCsvRowToRange(array $row) : ?array {
 }
 
 function country_from_ip(string $ip, string $csvFile) : string {
+    if (!is_public_ip($ip)) return 'ZZ';
     $ip16 = ipToBin16($ip);
     if ($ip16 === null) return 'ZZ';
     if (!is_readable($csvFile)) return 'ZZ';
@@ -121,9 +150,18 @@ function save_data(string $file, array $data) : bool {
     return rename($tmp, $file);
 }
 
-// ---- main ----
-// ---- main ----
-$ip = $_GET['testip'] ?? client_ip($TRUST_PROXY, $TRUSTED_PROXIES);
+// ---------------- MAIN ----------------
+$ip = client_ip($TRUST_PROXY, $TRUSTED_PROXIES);
+
+// check test IP override
+if (isset($_GET['testip'], $_GET['key']) && $_GET['key'] === $TEST_KEY) {
+    $ip = $_GET['testip'];
+}
+
+if ($ip === '0.0.0.0') {
+    echo json_encode(['ok'=>false,'error'=>'no valid public IP']);
+    exit;
+}
 
 if (!is_readable($CSV_IPV6)) {
     http_response_code(500);
